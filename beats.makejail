@@ -1,0 +1,27 @@
+%{WAZUH_FILEBEAT_MODULE_VER:0.4}
+
+ARG logstash_addr?
+ARG logstash_port=5044
+ARG filebeat_conf=files/filebeat.yml
+
+OPTION start
+OPTION overwrite=force
+
+PKG beats8
+
+CMD echo "======> Installing Wazuh module for filebeat <======"
+CMD cd /tmp && \
+    fetch https://packages.wazuh.com/4.x/filebeat/wazuh-filebeat-%{WAZUH_FILEBEAT_MODULE_VER}.tar.gz && \
+    tar -C /usr/local/share/beats/filebeat/module -xf wazuh-filebeat-%{WAZUH_FILEBEAT_MODULE_VER}.tar.gz && \
+    rm -f wazuh-filebeat-%{WAZUH_FILEBEAT_MODULE_VER}.tar.gz
+
+CMD echo "======> Filebeat <======"
+COPY ${filebeat_conf} /usr/local/etc/beats/filebeat.yml
+RAW if [ -n "${logstash_addr}" ]; then
+        REPLACE /usr/local/etc/beats/filebeat.yml LOGSTASH_ADDR ${logstash_addr}
+RAW fi
+REPLACE /usr/local/etc/beats/filebeat.yml LOGSTASH_PORT ${logstash_port}
+CMD chown root:wheel /usr/local/etc/beats/filebeat.yml
+CMD chmod 644 /usr/local/etc/beats/filebeat.yml
+SYSRC filebeat_enable=YES
+SERVICE filebeat start

@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# PROVIDE: wazuh_manager_mount
+# REQUIRE: LOGIN
+# BEFORE: wazuh_manager
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="wazuh_manager_mount"
+rcvar="wazuh_manager_mount_enable"
+required_files="/wazuh-manager-mount.lst"
+required_dirs="/data"
+start_cmd="start_wazuh_manager_mount"
+stop_cmd="stop_wazuh_manager_mount"
+
+load_rc_config $name
+
+: ${wazuh_manager_mount_enable:="NO"}
+
+start_wazuh_manager_mount()
+{
+    /bin/cat "/wazuh-manager-mount.lst" | /usr/bin/sort | /usr/bin/xargs -I % /sbin/mount -t nullfs /data/% /var/ossec/%
+}
+
+stop_wazuh_manager_mount()
+{
+    /bin/cat "/wazuh-manager-mount.lst" | /usr/bin/sort -r | /usr/bin/xargs -I % /sbin/umount /var/ossec/%
+}
+
+run_rc_command "$1"

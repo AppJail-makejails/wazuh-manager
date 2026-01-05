@@ -1,110 +1,30 @@
-INCLUDE options/options.makejail
+OPTION start
+OPTION overwrite=force
 
-ARG server_ip=10.0.0.2
-ARG network=wazuh-net
+PKG wazuh-manager gsed bash
 
-CMD sed -e "s|quarterly|latest|g" -i.bak /etc/pkg/FreeBSD.conf
+COPY scripts
 
-PKG bash wazuh-indexer wazuh-server wazuh-dashboard openjdk17
+CMD mkdir -p /usr/local/etc/rc.d
+COPY files/wazuh-manager-mount.in /usr/local/etc/rc.d/wazuh-manager-mount
+CMD chmod +x /usr/local/etc/rc.d/wazuh-manager-mount
 
-CMD openssl req -x509 -batch -nodes -days 365 -newkey rsa:2048 -subj "/C=US/ST=California/CN=Wazuh/" -keyout /var/ossec/etc/sslmanager.key -out /var/ossec/etc/sslmanager.cert
-CMD chmod 640 /var/ossec/etc/sslmanager.key
-CMD chmod 640 /var/ossec/etc/sslmanager.cert
-
-CMD cp /etc/localtime /var/ossec/etc
-CMD cp /usr/local/etc/wazuh-server/wazuh-template.json /usr/local/etc/logstash/
-COPY files/var/ossec/etc/decoders/local_decoder.xml /var/ossec/etc/decoders/
-CMD chown wazuh:wazuh /var/ossec/etc/decoders/local_decoder.xml
-CMD chmod 660 /var/ossec/etc/decoders/local_decoder.xml
-COPY files/var/ossec/etc/rules/local_rules.xml /var/ossec/etc/rules/
-CMD chown wazuh:wazuh /var/ossec/etc/rules/local_rules.xml
-CMD chmod 660 /var/ossec/etc/rules/local_rules.xml
-COPY files/var/ossec/etc/ossec.conf /var/ossec/etc
-COPY files/var/ossec/etc/ossec.conf /var/ossec/etc
-COPY files/usr/local/etc/beats/filebeat.yml /usr/local/etc/beats/
-COPY files/usr/local/etc/logstash/logstash.conf /usr/local/etc/logstash/
-COPY files/usr/local/etc/opensearch/opensearch.yml /usr/local/etc/opensearch/opensearch.yml
-COPY files/usr/local/etc/opensearch-dashboards/opensearch_dashboards.yml /usr/local/etc/opensearch-dashboards/
-COPY files/etc/hosts /etc/
-COPY files/root/pre-opensearch-init.sh /root/
-COPY files/root/post-opensearch-init.sh /root/
-
-REPLACE /usr/local/etc/beats/filebeat.yml SERVER_IP ${server_ip}
-CMD chown root:wheel /usr/local/etc/beats/filebeat.yml
-REPLACE /usr/local/etc/logstash/logstash.conf SERVER_IP ${server_ip}
-CMD chown root:wheel /usr/local/etc/logstash/logstash.conf
-REPLACE /usr/local/etc/opensearch/opensearch.yml SERVER_IP ${server_ip}
-CMD chown root:wheel /usr/local/etc/opensearch/opensearch.yml
-REPLACE /usr/local/etc/opensearch-dashboards/opensearch_dashboards.yml SERVER_IP ${server_ip}
-CMD chown root:wheel /usr/local/etc/opensearch-dashboards/opensearch_dashboards.yml
-REPLACE /etc/hosts SERVER_IP ${server_ip}
-CMD chown root:wheel /etc/hosts
-REPLACE /root/post-opensearch-init.sh SERVER_IP ${server_ip}
-CMD chown root:wheel /root/pre-opensearch-init.sh
-CMD chown root:wheel /root/post-opensearch-init.sh
-
-CMD sh /root/pre-opensearch-init.sh
-CMD rm /root/pre-opensearch-init.sh
-
-CMD mkdir -p /usr/local/etc/opensearch-dashboards/certs/
-CMD mkdir -p /usr/local/etc/opensearch/certs/
-CMD cd /root/; fetch "https://people.freebsd.org/~acm/ports/wazuh/freebsd-logo.png"
-CMD cd /root/; fetch "https://people.freebsd.org/~acm/ports/wazuh/freebsd-mark-logo.png"
-CMD cd /root/; fetch "https://people.freebsd.org/~acm/ports/wazuh/wazuh-gen-certs.tar.gz"
-CMD cd /root/; tar xvfz wazuh-gen-certs.tar.gz
-CMD echo "dashboard_ip=${server_ip}" > /root/wazuh-gen-certs/dashboard.lst
-CMD echo "indexer1_ip=${server_ip}" > /root/wazuh-gen-certs/indexer.lst
-CMD echo "server1_ip=${server_ip}" > /root/wazuh-gen-certs/server.lst
-CMD cd /root/wazuh-gen-certs; echo y | sh gen-certs.sh
-
-CMD chmod 660 /var/ossec/etc/ossec.conf
-CMD chown root:wazuh /var/ossec/etc/ossec.conf
-
-CMD cp /root/wazuh-gen-certs/wazuh-certificates/admin.pem /usr/local/etc/opensearch/certs/
-CMD chmod 640 /usr/local/etc/opensearch/certs/admin.pem
-CMD chown opensearch:opensearch /usr/local/etc/opensearch/certs/admin.pem
-CMD cp /root/wazuh-gen-certs/wazuh-certificates/admin-key.pem /usr/local/etc/opensearch/certs/
-CMD chmod 640 /usr/local/etc/opensearch/certs/admin-key.pem
-CMD chown opensearch:opensearch /usr/local/etc/opensearch/certs/admin-key.pem
-CMD cp /root/wazuh-gen-certs/wazuh-certificates/indexer1.pem /usr/local/etc/opensearch/certs/
-CMD chmod 640 /usr/local/etc/opensearch/certs/indexer1.pem
-CMD chown opensearch:opensearch /usr/local/etc/opensearch/certs/indexer1.pem
-CMD cp /root/wazuh-gen-certs/wazuh-certificates/indexer1-key.pem /usr/local/etc/opensearch/certs/
-CMD chmod 640 /usr/local/etc/opensearch/certs/indexer1-key.pem
-CMD chown opensearch:opensearch /usr/local/etc/opensearch/certs/indexer1-key.pem
-CMD cp /root/wazuh-gen-certs/wazuh-certificates/root-ca.pem /usr/local/etc/opensearch/certs/
-CMD chmod 640 /usr/local/etc/opensearch/certs/root-ca.pem
-CMD chown opensearch:opensearch /usr/local/etc/opensearch/certs/root-ca.pem
-
-CMD cp /root/wazuh-gen-certs/wazuh-certificates/dashboard.pem /usr/local/etc/opensearch-dashboards/certs/
-CMD chmod 640 /usr/local/etc/opensearch-dashboards/certs/dashboard.pem
-CMD chown www:www /usr/local/etc/opensearch-dashboards/certs/dashboard.pem
-CMD cp /root/wazuh-gen-certs/wazuh-certificates/dashboard-key.pem /usr/local/etc/opensearch-dashboards/certs/
-CMD chmod 640 /usr/local/etc/opensearch-dashboards/certs/dashboard-key.pem
-CMD chown www:www /usr/local/etc/opensearch-dashboards/certs/dashboard-key.pem
-CMD cp /root/wazuh-gen-certs/wazuh-certificates/root-ca.pem /usr/local/etc/opensearch-dashboards/certs/
-CMD chmod 640 /usr/local/etc/opensearch-dashboards/certs/root-ca.pem
-CMD chown www:www /usr/local/etc/opensearch-dashboards/certs/root-ca.pem
-
-CMD cp /root/freebsd-logo.png /usr/local/www/opensearch-dashboards/src/core/server/core_app/assets/logos/
-CMD cp /root/freebsd-mark-logo.png /usr/local/www/opensearch-dashboards/src/core/server/core_app/assets/logos/
+CMD set -o pipefail; set -xe; mkdir -p /config && \
+    for f in permanent_data.env create_user.py; do \
+        fetch -o /config/${f} https://github.com/wazuh/wazuh-docker/raw/refs/heads/main/build-docker-images/wazuh-manager/config/${f}; \
+    done && \
+    mv /config/permanent_data.env /permanent_data.env && \
+    bash /scripts/permanent_data.sh && \
+    mv /config/create_user.py /var/ossec/framework/scripts/create_user.py && \
+    chown root:wazuh /var/ossec/framework/scripts/create_user.py && \
+    rmdir /config && \
+    mkdir -p /var/ossec/var/multigroups && \
+    chown root:wazuh /var/ossec/var/multigroups && \
+    chmod 770 /var/ossec/var/multigroups && \
+    mkdir -p /var/ossec/active-response/bin && \
+    chown root:wazuh /var/ossec/active-response/bin && \
+    chmod 770 /var/ossec/active-response/bin
+RUN /scripts/init.sh
 
 SYSRC wazuh_manager_enable=YES
-SYSRC filebeat_enable=YES
-SYSRC logstash_enable=YES
-SYSRC opensearch_enable=YES
-SYSRC opensearch_dashboards_enable=YES
-SYSRC opensearch_dashboards_syslog_output_enable=YES
-
-SERVICE opensearch start
-
-CMD sh /root/post-opensearch-init.sh
-CMD rm /root/post-opensearch-init.sh
-
-CMD chmod 640 /var/ossec/etc/authd.pass
-CMD chown root:wazuh /var/ossec/etc/authd.pass
-
 SERVICE wazuh-manager start
-SERVICE filebeat start
-SERVICE logstash start
-SERVICE opensearch-dashboards start

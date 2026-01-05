@@ -1,0 +1,29 @@
+warn()
+{
+	echo "##!> $* <!##"
+}
+
+err()
+{
+	echo "###> $* <###"
+}
+
+info()
+{
+	echo "======> $* <======"
+}
+
+error_and_exit()
+{
+    err "Error executing command: '$1'."
+    err 'Exiting.'
+    exit 1
+}
+
+exec_cmd() {
+    eval $1 > /dev/null 2>&1 || error_and_exit "$1"
+}
+
+exec_cmd_stdout() {
+    eval $1 2>&1 || error_and_exit "$1"
+}
