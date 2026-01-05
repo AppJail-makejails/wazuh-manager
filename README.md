@@ -438,7 +438,7 @@ user-files/
 9 directories, 4 files
 # appjail-director up
 Starting Director (project:wazuh-manager) ...
-Creating wazuh-manager (wazuh-manager) ... Done.
+Creating wazuh-manager (0d1967ad5d) ... Done.
 Creating beats (08496597d0) ... Done.
 Finished: wazuh-manager
 ```
