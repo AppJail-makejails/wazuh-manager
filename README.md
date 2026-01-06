@@ -55,6 +55,7 @@ services:
       - logstash_addr: '10.0.0.81'
     volumes:
       - wazuh-logs: /var/ossec/logs
+      - beats-data: /var/db/beats
 volumes:
   wazuh-data:
     device: /var/appjail-volumes/wazuh/data
@@ -67,6 +68,11 @@ volumes:
   wazuh-pkgcache:
     device: /var/appjail-volumes/wazuh/pkgcache
     type: nullfs
+  beats-data:
+    device: /var/appjail-volumes/wazuh/beats-data
+    owner: 0
+    group: 0
+    mode: 0755
 ```
 
 **template.conf**:
