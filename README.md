@@ -37,6 +37,7 @@ services:
       - WAZUH_NODE_NAME: 'manager'
       - WAZUH_CLUSTER_NODES: '10.0.0.80'
       - WAZUH_CLUSTER_BIND_ADDR: '10.0.0.80'
+      - WAZUH_CLUSTER_KEY: '10451c28f859299128c8bb50dde28675'
       - WAZUH_INDEXER_HOSTS: '10.0.0.81:9200'
       - INDEXER_USERNAME: 'admin'
       - INDEXER_PASSWORD: 'admin'
