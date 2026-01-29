@@ -165,7 +165,7 @@ fhlc0egBAfx0vZMWoJig4bhZjPgxG8tKEM0yTBfd50Q
   <remote>
     <connection>secure</connection>
     <port>1514</port>
-    <protocol>udp</protocol>
+    <protocol>tcp</protocol>
     <queue_size>131072</queue_size>
   </remote>
 
