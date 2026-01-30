@@ -192,8 +192,14 @@ configure_vulnerability_detection()
 {
     if [ -n "$INDEXER_PASSWORD" ]; then
         info "Configuring password."
-        echo "$INDEXER_PASSWORD" | /var/ossec/bin/wazuh-keystore -f indexer -k password
-        echo "$INDEXER_USERNAME" | /var/ossec/bin/wazuh-keystore -f indexer -k username
+        # Note about WAZUH_HOME environment variable:
+        #
+        #   Workaround for the error "No such file or directory" at least in FreeBSD 14.3,
+        #   as it does not implement /proc/self/exe. In FreeBSD 15.x this error does not
+        #   exist because procfs implements the necessary pseudo-file.
+        #
+        echo "$INDEXER_PASSWORD" | env WAZUH_HOME=/var/ossec /var/ossec/bin/wazuh-keystore -f indexer -k password
+        echo "$INDEXER_USERNAME" | env WAZUH_HOME=/var/ossec /var/ossec/bin/wazuh-keystore -f indexer -k username
     fi
 }
 
