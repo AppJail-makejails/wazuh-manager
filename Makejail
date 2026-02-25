@@ -9,9 +9,13 @@ CMD mkdir -p /usr/local/etc/rc.d
 COPY files/wazuh-manager-mount.in /usr/local/etc/rc.d/wazuh-manager-mount
 CMD chmod +x /usr/local/etc/rc.d/wazuh-manager-mount
 
+RAW wazuh_version=`appjail pkg jail "${APPJAIL_JAILNAME}" query -e '%n=wazuh-manager' %v`
+
+VAR --make-arg-env wazuh_version=${wazuh_version}
+
 CMD set -o pipefail; set -xe; mkdir -p /config && \
     for f in permanent_data.env create_user.py; do \
-        fetch -o /config/${f} https://github.com/wazuh/wazuh-docker/raw/refs/heads/main/build-docker-images/wazuh-manager/config/${f}; \
+        fetch -o /config/${f} https://github.com/wazuh/wazuh-docker/raw/refs/tags/v${wazuh_version}/build-docker-images/wazuh-manager/config/${f}; \
     done && \
     mv /config/permanent_data.env /permanent_data.env && \
     bash /scripts/permanent_data.sh && \

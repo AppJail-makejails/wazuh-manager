@@ -3,10 +3,33 @@
 . /scripts/lib.subr
 . /permanent_data.env
 
+set -o pipefail
+
 if [ ! -d "/data" ]; then
     info "Creating permanent data directory"
     exec_cmd_stdout "mkdir -p /data"
 fi
+
+# To avoid errors in tar(1), we need to remove non existent files.
+
+i=0; l=
+for f in ${PERMANENT_DATA[@]}; do
+    if [ ! -e "${f}" ]; then
+        continue
+    fi
+
+    l[((i++))]="${f}"
+done
+PERMANENT_DATA=("${l[@]}")
+i=0; l=
+for f in ${PERMANENT_DATA_EXCP[@]}; do
+    if [ ! -e "${f}" ]; then
+        continue
+    fi
+
+    l[((i++))]="${f}"
+done
+PERMANENT_DATA_EXCP=("${l[@]}")
 
 info "Copying permanent data to volume"
 tar -C / -cf - ${PERMANENT_DATA[@]} | tar -C /data --strip-components=2 -xvpkf - || exit $?
