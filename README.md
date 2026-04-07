@@ -20,7 +20,6 @@ DIRECTOR_PROJECT=wazuh-manager
 
 ```yaml
 options:
-  - osversion: '14.3-RELEASE'
   - copydir: 'user-files'
   - file: '/usr/local/etc/pkg/repos/Latest.conf'
   - template: 'template.conf'
@@ -67,7 +66,7 @@ volumes:
     device: /var/appjail-volumes/wazuh/indexer-connector-certs
     options: ro
   wazuh-pkgcache:
-    device: /var/appjail-volumes/wazuh/pkgcache
+    device: /var/cache/wazuh/pkgcache
     type: nullfs
   beats-data:
     device: /var/appjail-volumes/wazuh/beats-data
@@ -94,7 +93,7 @@ persist
 **user-files/usr/local/etc/pkg/repos/Latest.conf**:
 
 ```
-FreeBSD: {
+FreeBSD-ports: {
   url: "pkg+https://pkg.FreeBSD.org/${ABI}/latest",
   mirror_type: "srv",
   signature_type: "fingerprints",

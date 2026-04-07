@@ -1,4 +1,4 @@
-%{WAZUH_FILEBEAT_MODULE_VER:0.4}
+%{WAZUH_FILEBEAT_MODULE_VER:0.5}
 
 ARG logstash_addr?
 ARG logstash_port=5044

@@ -9,7 +9,7 @@ CMD mkdir -p /usr/local/etc/rc.d
 COPY files/wazuh-manager-mount.in /usr/local/etc/rc.d/wazuh-manager-mount
 CMD chmod +x /usr/local/etc/rc.d/wazuh-manager-mount
 
-RAW wazuh_version=`appjail pkg jail "${APPJAIL_JAILNAME}" query -e '%n=wazuh-manager' %v`
+RAW wazuh_version=`appjail pkg jail "${APPJAIL_JAILNAME}" query -e '%n=wazuh-manager' %v | cut -d_ -f1`
 
 VAR --make-arg-env wazuh_version=${wazuh_version}
 
